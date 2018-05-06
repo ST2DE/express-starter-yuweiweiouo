@@ -17,7 +17,7 @@ let taskController = {
   },
   user: function (req, res) {
     if(req.body.action == "create"){
-      user.findOrCreate({ where: { username: req.body.username }, defaults: { password: req.body.password } })
+      User.findOrCreate({ where: { username: req.body.username }, defaults: { password: req.body.password } })
       .spread((user, created) => {
         console.log(user.get({
           plain: true
@@ -31,6 +31,9 @@ let taskController = {
     if(req.body.action == "create"){
     }
 
-    },
+ },
+  login: function(req, res) {
+      res.render('login');
+  }
   };
   module.exports = taskController;
