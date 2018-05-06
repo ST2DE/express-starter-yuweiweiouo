@@ -1,18 +1,36 @@
 var db = require('../models');
 var Task = db.Task;
+var User = db.User;
 
 let taskController = {
   index: function (req, res) {
     Task.findAll()
-      .then(function (tasks) {
-        res.render('index', {"tasks": tasks});
-      });
+    .then(function (tasks) {
+      res.render('index', {"tasks": tasks});
+    });
   },
   indexApi: function (req, res) {
     Task.findAll()
-      .then(function (tasks) {
-        res.json(tasks);
-      });
+    .then(function (tasks) {
+      res.json(tasks);
+    });
   },
-};
-module.exports = taskController;
+  user: function (req, res) {
+    if(req.body.action == "create"){
+      user.findOrCreate({ where: { username: req.body.username }, defaults: { password: req.body.password } })
+      .spread((user, created) => {
+        console.log(user.get({
+          plain: true
+        }))
+        console.log(created)
+      })
+
+      return res.redirect('/tasks');
+    };
+
+    if(req.body.action == "create"){
+    }
+
+    },
+  };
+  module.exports = taskController;
