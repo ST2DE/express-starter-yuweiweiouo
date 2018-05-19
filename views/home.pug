@@ -1,0 +1,33 @@
+extends layout
+
+block content   
+    .container.w-75.mt-5.mx-auto.text-center  
+        div.my-5
+            .title(style="font-size:1.5em;")
+                | Let's play a game
+        form(action="/game" method="post")
+            .input-group.mt-5.w-50.mx-auto
+                .input-group-prepend
+                    span#inputGroup-sizing-default.input-group-text Room ID
+                input#room-id.form-control(name="room_id" type="text" aria-label="Default" aria-describedby="inputGroup-sizing-default")
+
+            .input-group.mt-3.w-50.mx-auto
+                .input-group-prepend
+                    span#inputGroup-sizing-default.input-group-text Name  
+                input#username.form-control(name="username" type="text" aria-label="Default" aria-describedby="inputGroup-sizing-default")            
+
+            button.btn.btn-sm.btn-secondary.mt-5.submit(type="submit" disabled)
+                | 進入
+
+    script.
+        $(document).ready(function() {
+            if("#{existed}" == "true")
+                alert("the room is already existed!!!");
+
+            $("input").keyup(function(){
+                
+                if($("#room-id").val() != "" && $("#username").val() != "")
+                    $(".submit" ).prop( "disabled", false );
+            });    
+        });
+

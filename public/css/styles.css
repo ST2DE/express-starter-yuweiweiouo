@@ -1,0 +1,16 @@
+@import url('https://fonts.googleapis.com/css?family=Gloria+Hallelujah|Nunito');
+
+* {
+    box-sizing: border-box;
+}
+
+.game-table{
+    width: auto;   
+    font-size: 3em; 
+}
+.game-table table{
+    width: 2em;
+}
+.game-table td{
+    height: 2em;
+}

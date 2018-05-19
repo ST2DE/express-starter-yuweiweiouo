@@ -1,0 +1,216 @@
+extends layout
+
+block content
+    .container.w-75.mx-auto.text-center  
+        div.my-5
+            h3.title Hi #{name}
+            h3 Your role -> #{pattern}
+        .turn.alert.alert-warning.w-50.h-auto.mx-auto(role="alert")
+                | Waiting for player...
+
+        div.d-flex.flex-row.game-table.justify-content-center
+            table.table.table-hover.table-bordered
+                tbody
+                    tr 
+                        td.t1
+                    tr
+                        td.t4
+                    tr
+                        td.t7
+            table.table.table-hover.table-bordered
+                tbody
+                    tr
+                        td.t2
+                    tr
+                        td.t5
+                    tr
+                        td.t8
+            table.table.table-hover.table-bordered
+                tbody
+                    tr
+                        td.t3
+                    tr
+                        td.t6
+                    tr
+                        td.t9
+        button.back-btn.btn.btn-outline-dark(type="button")
+            | 結束
+    script.
+        $(document).ready(function() {
+            var board = "#{game_board}";
+            var round = 0;
+            var pattern = "#{pattern}";
+            var isGameStart = false;
+            var vice_pattern = ( pattern == "O")
+                                ?"X"
+                                :"O";
+            var listeningPlayerActoin;
+            
+            if("#{status}" == "waiting")                                
+                var findPlayer = setInterval(hasPlayerEnter, 1000);
+            else if("#{status}" == "playing") {
+                $(".title").text("➤ #{name} VS #{player1}")
+                isGameStart = true;
+                listeningPlayerActoin = setInterval(isRoundChange, 500);
+            }
+
+            $(function(){     
+                loadBoard();             
+                if(isMyTurn() && "#{status}" == "playing"){
+                    $(".turn").text("Now is your turn!");
+                }
+            })
+
+            function isRoundChange(){  
+                $.post("/game/getRoomInfo", {"room_id": "#{room_id}"})
+                    .done(function(rtn){
+                        if(rtn.error){
+                            window.location.replace("/index");
+                        } else if(round != rtn.result.round){
+                            clearInterval(listeningPlayerActoin);
+                            console.log(round);
+                            console.log(rtn);
+                            board = rtn.result.game_board;
+                            loadBoard();
+                            $(".turn").text("Now is your turn!");
+                            isWin();
+                        }
+                    });                   
+            }
+
+            function isMyTurn(){
+                var o = 0;
+                var x = 0;
+                var mTurn = false;
+
+                $("td").each(function(i){
+                    let c = $("td").eq(i).text(); 
+                    if(c == "O") 
+                        o++;
+                    else if(c == "X")
+                        x++;
+                });
+
+                if(o > x){
+                    mTurn = (pattern == "O")
+                        ? false
+                        : true;                    
+                } else{
+                    mTurn = (pattern == "O")
+                        ? true
+                        : false;    
+                }                
+                return mTurn;
+            }
+
+            function hasPlayerEnter(){
+                $.post("/game/isRoomFull", {"room_id": "#{room_id}"})
+                    .done(function(rtn){
+                        if(rtn.result){
+                            console.log("find it!!!");
+                            console.log(rtn);
+                            clearInterval(findPlayer);
+                            $(".turn").text("Now is your turn!");
+                            $(".title").text("➤ #{name} VS " + rtn.data.player2);
+                            isGameStart = true;
+
+                        } else{
+                            console.log("finding...");
+                        }
+                    });
+            }
+
+            function loadBoard(){
+                $("td").each(function(i){
+                    let c = board.charAt(i);
+                    if(c != '*')
+                        $("td").eq(i).text(c);                      
+                });
+            }
+
+            function getBoard(){
+                var rtn = "";
+                $("td").each(function(i){
+                    let c = $("td").eq(i).text();
+                    if(c == '')
+                        rtn += "*";
+                    else
+                        rtn += c;
+                });
+                return rtn;
+            }
+            
+            function isWin(){
+                var tBoard = "";
+                $("td").each(function(i){
+                    let c = $("td").eq(i).text();
+                    if(c == "O")
+                        tBoard += "0";
+                    else if(c == "X")
+                        tBoard += "1";
+                    else{
+                        tBoard += "9";
+                    }
+                });
+
+                let winType1 = parseInt(tBoard.charAt(0))+parseInt(tBoard.charAt(1))+parseInt(tBoard.charAt(2));
+                let winType2 = parseInt(tBoard.charAt(3))+parseInt(tBoard.charAt(4))+parseInt(tBoard.charAt(5));
+                let winType3 = parseInt(tBoard.charAt(6))+parseInt(tBoard.charAt(7))+parseInt(tBoard.charAt(8));
+                let winType4 = parseInt(tBoard.charAt(0))+parseInt(tBoard.charAt(3))+parseInt(tBoard.charAt(6));
+                let winType5 = parseInt(tBoard.charAt(1))+parseInt(tBoard.charAt(4))+parseInt(tBoard.charAt(7));
+                let winType6 = parseInt(tBoard.charAt(2))+parseInt(tBoard.charAt(5))+parseInt(tBoard.charAt(8));
+                let winType7 = parseInt(tBoard.charAt(0))+parseInt(tBoard.charAt(4))+parseInt(tBoard.charAt(8));
+                let winType8 = parseInt(tBoard.charAt(2))+parseInt(tBoard.charAt(4))+parseInt(tBoard.charAt(6));
+                let duce = parseInt(tBoard.charAt(0))+parseInt(tBoard.charAt(1))+parseInt(tBoard.charAt(2))
+                            + parseInt(tBoard.charAt(3))+parseInt(tBoard.charAt(4))+parseInt(tBoard.charAt(5))
+                            + parseInt(tBoard.charAt(6))+parseInt(tBoard.charAt(7))+parseInt(tBoard.charAt(8))
+                if(winType1==0 || winType2==0 || winType3==0 || winType4==0 || winType5==0 || winType6==0 || winType7==0 || winType8==0){
+                    $(".turn").text("O win");
+                    isGameStart = false;                    
+                    return true;
+                } else if(winType1==3 || winType2==3 || winType3==3 || winType4==3 || winType5==3 || winType6==3 || winType7==3 || winType8==3){
+                    $(".turn").text("X win");
+                    isGameStart = false;
+                    return true;
+                } else if(duce == 4){
+                    $(".turn").text("duce");
+                    isGameStart = false;
+                    return true;
+                }
+                console.log(tBoard);
+                return false;
+            }
+
+            $("td").click(function(){
+                var index = $("td").index(this);
+                console.log($("td").eq(index).text());
+                console.log("playing: " + isGameStart);
+                console.log("my turn: " + isMyTurn());
+                if($("td").eq(index).text() == "" && isGameStart && isMyTurn()){
+                    $("td").eq(index).text(pattern);                    
+                    
+                    var data = {
+                        "room_id": "#{room_id}",
+                        "game_board": getBoard()
+                    }
+
+                    $.post("/game/changeBoard", data)
+                        .done(function(rtn){
+                            round = rtn.result.round;
+                            $(".turn").text("Waiting for player...");
+                            listeningPlayerActoin = setInterval(isRoundChange, 500);
+                            if(isWin()){
+                                clearInterval(listeningPlayerActoin);
+                            }
+                        });       
+                }
+            });    
+
+            $(".back-btn").click(function(){
+                $.post("/game/gameEnd", {"room_id": "#{room_id}"})
+                    .done(function(rtn){
+                        window.location.replace("/index");
+                    });                
+            });
+        });        
+                                        

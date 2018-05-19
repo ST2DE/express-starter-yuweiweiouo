@@ -1,9 +1,12 @@
-const taskController = require('../controllers/taskController.js');
+const appController = require('../controllers/appController.js');
 
 module.exports = function (app) {
 
-  app.get('/tasks', taskController.index);
-  app.get('/api/tasks', taskController.indexApi);
-  app.get('/login', taskController.login);
-  app.post('/user', taskController.user);
+  app.get('/', appController.index);
+  app.get('/index', appController.index);
+  app.post('/game', appController.game);
+  app.post('/game/isRoomFull', appController.isRoomFull);
+  app.post('/game/changeBoard', appController.changeBoard);
+  app.post('/game/getRoomInfo', appController.getRoomInfo);
+  app.post('/game/gameEnd', appController.gameEnd);
 };
